@@ -1,22 +1,17 @@
 import { useEffect, useRef } from "react";
 import {
-  Viewer, CameraEventType, ImageryLayer, TileMapServiceImageryProvider,
+  Viewer, CameraEventType, ImageryLayer, UrlTemplateImageryProvider,
   Cartesian2, Cartesian3, Color, ScreenSpaceEventHandler,
-  ScreenSpaceEventType, buildModuleUrl,
+  ScreenSpaceEventType,
 } from "cesium";
 
 const colorFor = (value, mode) => {
-  if (mode === "anomaly") return Color.fromCssColorString(value >= 0 ? "#ff896f" : "#77bce9").withAlpha(0.92);
-  if (mode === "trend") return Color.fromCssColorString(value >= 0 ? "#ff9b6b" : "#68c6d3").withAlpha(0.94);
-  if (mode === "season") {
-    const t = Math.max(0, Math.min(1, value / 10));
-    return Color.fromCssColorString(t < 0.55 ? "#79d5bd" : "#f0bd68").withAlpha(0.92);
-  }
+  if (mode === "anomaly") return Color.fromCssColorString(value > 1 ? "#ff896f" : value < -1 ? "#1412ac" : "#70cbb2").withAlpha(0.92);
   const t = Math.max(0, Math.min(1, (value ?? 0) / 10));
   return Color.fromCssColorString(t < 0.52 ? "#f5c56e" : "#ff765e").withAlpha(0.55 + t * 0.4);
 };
 
-export default function EarthGlobe({ cities, links, mode, selected, monthIndex, onPick }) {
+export default function EarthGlobe({ cities = [], mode, selected, monthIndex, onPick, autoFocus = true, initialView = [-25, 18, 19000000] }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
   const cityEntities = useRef(new Map());
@@ -24,7 +19,12 @@ export default function EarthGlobe({ cities, links, mode, selected, monthIndex, 
   onPickRef.current = onPick;
 
   useEffect(() => {
-    const baseLayer = ImageryLayer.fromProviderAsync(TileMapServiceImageryProvider.fromUrl(buildModuleUrl("Assets/Textures/NaturalEarthII")));
+    const imageryProvider = new UrlTemplateImageryProvider({
+      url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      credit: "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+      maximumLevel: 19,
+    });
+    const baseLayer = new ImageryLayer(imageryProvider);
     const viewer = new Viewer(containerRef.current, {
       baseLayer, baseLayerPicker: false, geocoder: false, homeButton: false,
       sceneModePicker: false, navigationHelpButton: false, animation: false,
@@ -33,10 +33,11 @@ export default function EarthGlobe({ cities, links, mode, selected, monthIndex, 
     });
     viewerRef.current = viewer;
     viewer.scene.globe.enableLighting = true;
+    viewer.scene.globe.maximumScreenSpaceError = 1.5;
     viewer.scene.backgroundColor = Color.fromCssColorString("#07131b");
     viewer.scene.screenSpaceCameraController.enableTilt = true;
     viewer.scene.screenSpaceCameraController.zoomEventTypes = [CameraEventType.WHEEL, CameraEventType.PINCH];
-    viewer.camera.setView({ destination: Cartesian3.fromDegrees(-25, 18, 27000000) });
+    viewer.camera.setView({ destination: Cartesian3.fromDegrees(...initialView) });
     const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction(click => {
       const hit = viewer.scene.pick(click.position);
@@ -52,7 +53,7 @@ export default function EarthGlobe({ cities, links, mode, selected, monthIndex, 
     const active = new Set(cities.map(c => c.id));
     for (const [id, entity] of cityEntities.current) if (!active.has(id)) { viewer.entities.remove(entity); cityEntities.current.delete(id); }
     for (const city of cities) {
-      const value = mode === "anomaly" ? (city._z ?? 0) : mode === "season" ? (city.climatologia?.[monthIndex % 12] ?? 0) : mode === "trend" ? (city.sen_pendiente ?? 0) * 100 : (city._uv ?? 0);
+      const value = mode === "anomaly" ? (city._z ?? 0) : (city._uv ?? 0);
       let entity = cityEntities.current.get(city.id);
       const color = colorFor(value, mode);
       if (!entity) {
@@ -72,23 +73,9 @@ export default function EarthGlobe({ cities, links, mode, selected, monthIndex, 
 
   useEffect(() => {
     const viewer = viewerRef.current;
-    if (!viewer || !selected) return;
-    viewer.camera.flyTo({ destination: Cartesian3.fromDegrees(selected.lon, selected.lat, 8000000), duration: 1.1 });
-  }, [selected?.id]);
-
-  useEffect(() => {
-    const viewer = viewerRef.current;
-    if (!viewer) return;
-    // Rebuild a modest correlation network. Width and opacity encode |r|.
-    const old = viewer.entities.values.filter(entity => entity.properties?.isLink?.getValue?.());
-    old.forEach(entity => viewer.entities.remove(entity));
-    for (const feature of links) {
-      const p = feature.properties;
-      const coordinates = feature.geometry.coordinates;
-      const positions = coordinates.map(([lon, lat]) => Cartesian3.fromDegrees(lon, lat));
-      viewer.entities.add({ properties: { isLink: true }, polyline: { positions, width: 0.6 + Math.abs(p.r) * 2, material: Color.fromCssColorString(p.r >= 0 ? "#5ec7bb" : "#8197d8").withAlpha(0.16 + Math.abs(p.r) * 0.48), arcType: 1 } });
-    }
-  }, [links]);
+    if (!viewer || !selected || !autoFocus) return;
+    viewer.camera.flyTo({ destination: Cartesian3.fromDegrees(selected.lon, selected.lat, 1700000), duration: 0.8 });
+  }, [selected?.id, autoFocus]);
 
   return <div ref={containerRef} className="globe" aria-label="Interactive globe showing UV data across selected cities" />;
 }

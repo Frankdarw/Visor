@@ -1,55 +1,38 @@
 # EarthScope
 
-EarthScope is an interactive globe for exploring monthly ultraviolet index patterns across 100 cities. The browser reads precomputed NASA POWER data; Python handles acquisition and statistical analysis.
+Visor de índice UV mensual de NASA POWER para las ciudades de `ciudades.csv`. La página muestra el globo, permite recorrer los meses y grafica el promedio anual de la ciudad seleccionada. Los años se clasifican como por encima, por debajo o normales según su desviación frente al promedio anual de esa ciudad.
 
-## Run the web app
-
-Requirements: Node.js 20.19+ or 22.12+.
+## Ejecutar
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. No Cesium ion token is needed: the globe uses Cesium's Natural Earth base map.
+## Actualizar datos
 
-## Explore
-
-- **UV index:** monthly NASA POWER value for the selected date.
-- **Seasonality:** mean profile across the twelve calendar months.
-- **Anomalies:** standardized monthly deviation from the city's climatology.
-- **Long-term trend:** Sen slope estimated by the Python analysis.
-- Search and filter cities by catalog level; choose a month with the timeline or select a point on the globe.
-- Correlation links show pairs with correlated monthly anomalies. Correlation does not establish causation.
-
-The city profile includes the 2001–2024 monthly series, seasonal climatology, annual mean, peak month, trend, and FDR significance. City locations inherit NASA POWER's approximate 1° grid resolution.
-
-## Reproduce or update the analysis
-
-This folder includes the Python scripts, catalog, and downloaded city CSV files used for the current results.
+Instala las dependencias de Python una vez:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python descargar_power.py --fin 2024
+```
+
+Descarga los datos mensuales y genera los archivos que carga la página:
+
+```powershell
+python descargar_power.py
 python analizar_ciudades.py
 ```
 
-After creating new results, run `.actualizar-datos.ps1` to copy the generated analysis products into `public/data`, which is what the web app serves. `NASA Callenge` is the original project folder used as the source for this sync script; edit `$sourceResults` in the script if you keep the analysis output elsewhere.
+El análisis escribe directamente `public/data/series_mensuales.json` y `public/data/earthscope_ciudades.geojson`. También se puede ejecutar `actualizar-datos.ps1` para regenerarlos sin volver a descargar.
 
-## Data and methods
+## Datos y clasificación
 
-- NASA POWER monthly `ALLSKY_SFC_UV_INDEX`, 2001–2024.
-- Python outputs: monthly UV and standardized anomalies, 12-month climatology, city statistics, trend significance, anomaly correlations, GeoJSON city locations, and correlation connections.
-- Correlations are descriptive associations; they do not identify a physical cause.
-- City coordinates and elevation are catalog metadata; POWER values represent gridded cells, not ground sensors at each city center.
+- Fuente: NASA POWER, parámetro mensual `ALLSKY_SFC_UV_INDEX`.
+- El análisis conserva años completos entre 2001 y 2024.
+- Un año queda **por encima** si su promedio anual supera el promedio de la ciudad por más de una desviación estándar; **por debajo** si queda más de una desviación estándar bajo el promedio; los demás son **normales**.
+- La anomalía mensual compara cada mes con la climatología de ese mismo mes. En el mapa, las clases usan ±1 desviación estándar mensual.
 
-## Build a static site
-
-```powershell
-npm run build
-npm run preview
-```
-
-Deploy the generated `dist/` directory to any static hosting provider. All app data is shipped under `public/data` and does not require an API server.
+Para crear el sitio estático: `npm run build`. Los archivos listos para publicar quedan en `dist/`.
