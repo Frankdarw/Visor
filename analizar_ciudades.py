@@ -111,7 +111,7 @@ def main():
 
     geojson = {"type": "FeatureCollection", "features": features}
     payload = {"inicio": f"{args.inicio}-01", "fin": f"{args.fin}-12", "fechas": dates_text, "ciudades": city_series}
-    (output / "earthscope_ciudades.geojson").write_text(json.dumps(clean(geojson), ensure_ascii=False), encoding="utf-8")
+    (output / "prisma_ciudades.geojson").write_text(json.dumps(clean(geojson), ensure_ascii=False), encoding="utf-8")
     (output / "series_mensuales.json").write_text(json.dumps(clean(payload), ensure_ascii=False), encoding="utf-8")
     print(f"\nDatos de {len(features)} ciudades escritos en {output.resolve()}")
 

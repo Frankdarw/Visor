@@ -34,7 +34,7 @@ export default function EarthGlobe({ cities = [], mode, selected, monthIndex, on
     viewerRef.current = viewer;
     viewer.scene.globe.enableLighting = true;
     viewer.scene.globe.maximumScreenSpaceError = 1.5;
-    viewer.scene.backgroundColor = Color.fromCssColorString("#07131b");
+    viewer.scene.backgroundColor = Color.fromCssColorString("#101a14");
     viewer.scene.screenSpaceCameraController.enableTilt = true;
     viewer.scene.screenSpaceCameraController.zoomEventTypes = [CameraEventType.WHEEL, CameraEventType.PINCH];
     viewer.camera.setView({ destination: Cartesian3.fromDegrees(...initialView) });

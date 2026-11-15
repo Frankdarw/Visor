@@ -1,4 +1,4 @@
-# EarthScope
+# PRISMA
 
 Visor de índice UV mensual de NASA POWER para las ciudades de `ciudades.csv`. La página muestra el globo, permite recorrer los meses y grafica el promedio anual de la ciudad seleccionada. Los años se clasifican como por encima, por debajo o normales según su desviación frente al promedio anual de esa ciudad.
 
@@ -26,7 +26,7 @@ python descargar_power.py
 python analizar_ciudades.py
 ```
 
-El análisis escribe directamente `public/data/series_mensuales.json` y `public/data/earthscope_ciudades.geojson`. También se puede ejecutar `actualizar-datos.ps1` para regenerarlos sin volver a descargar.
+El análisis escribe directamente `public/data/series_mensuales.json` y `public/data/prisma_ciudades.geojson`. También se puede ejecutar `actualizar-datos.ps1` para regenerarlos sin volver a descargar.
 
 ## Datos y clasificación
 

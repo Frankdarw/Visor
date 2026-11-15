@@ -37,13 +37,13 @@ export default function Landing() {
 
   return <main className="landing" lang={language}>
     <header className="landing-header">
-      <a className="landing-brand" href="#home" aria-label="EarthScope home"><ProjectIcon/><span>EarthScope</span></a>
+      <a className="landing-brand" href="#home" aria-label="PRISMA home"><ProjectIcon/><span>PRISMA<small>EARTH OBSERVATION &amp; DATA SCIENCE</small></span></a>
       <div className="landing-actions"><label className="landing-language"><span className="sr-only">Language / Idioma</span><select value={language} onChange={e => setLanguage(e.target.value)} aria-label="Language / Idioma"><option value="en">EN</option><option value="es">ES</option></select></label><a className="button button-small" href="/explorar">↗ <span>{t.open}</span><b>→</b></a></div>
     </header>
 
     <section className="landing-hero" id="home">
       <div className="hero-globe"><EarthGlobe cities={[]} mode="uv" monthIndex={0} onPick={() => {}} autoFocus={false}/></div>
-      <div className="hero-stars" aria-hidden="true"/><div className="hero-copy"><span className="landing-eyebrow">{t.eyebrow}</span><h1>Earth<span>Scope</span></h1><h2>{t.tagline}</h2><i className="cyan-rule"/><p>{t.intro}</p><div className="hero-buttons"><a className="button" href="/explorar">▤ <span>{t.explore}</span> <b>→</b></a></div></div>
+      <div className="hero-stars" aria-hidden="true"/><div className="hero-copy"><span className="landing-eyebrow">{t.eyebrow}</span><h1>PRIS<span>MA</span></h1><h2>{t.tagline}</h2><i className="cyan-rule"/><p>{t.intro}</p><div className="hero-buttons"><a className="button" href="/explorar">▤ <span>{t.explore}</span> <b>→</b></a></div></div>
       <div className="hero-data-tag"><span className="pulse-dot"/> {t.dataSource}<b>NASA POWER</b><small>{years}</small></div>
       <aside className="author-panel" aria-label={t.authors}>
         <span className="author-heading">{t.authors}</span>

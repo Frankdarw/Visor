@@ -74,7 +74,7 @@ export default function App() {
   useEffect(() => {
     Promise.all([
       fetch("/data/series_mensuales.json").then(response => { if (!response.ok) throw Error("series"); return response.json(); }),
-      fetch("/data/earthscope_ciudades.geojson").then(response => { if (!response.ok) throw Error("cities"); return response.json(); }),
+      fetch("/data/prisma_ciudades.geojson").then(response => { if (!response.ok) throw Error("cities"); return response.json(); }),
     ]).then(([series, cityGeo]) => {
       setData(series);
       setFeatures(cityGeo.features);
@@ -101,7 +101,7 @@ export default function App() {
 
   return <main className="workspace">
     <header className="topbar">
-      <a className="brand" href="/"><span className="brand-mark">E</span><span><b>EARTHSCOPE</b><small>NASA POWER · UV</small></span></a>
+      <a className="brand" href="/"><span className="brand-mark">P</span><span><b>PRISMA</b><small>EARTH OBSERVATION &amp; DATA SCIENCE</small></span></a>
       <div className="top-meta"><span className="live-dot" /> {t.record} <b>{data.inicio.slice(0, 4)}—{data.fin.slice(0, 4)}</b><i /> {t.cities} <b>{cities.length}</b></div>
       <span className="eyebrow top-eyebrow">{t.annualAnomalies}</span>
       <label className="language-picker"><span className="sr-only">Language / Idioma</span><select value={language} onChange={event => setLanguage(event.target.value)} aria-label="Language / Idioma"><option value="en">EN</option><option value="es">ES</option></select></label>
@@ -141,7 +141,7 @@ export default function App() {
       <div className="chart-block"><div className="section-title"><span>{t.uvByYear}</span><small>{data.inicio.slice(0, 4)}—{data.fin.slice(0, 4)}</small></div><AnnualChart series={selectedSeries} t={t}/></div>
       <div className="stats-grid annual-classes">{Object.entries(t.classes).map(([key, label]) => <div key={key}><small><i style={{ background: CLASS_COLOR[key] }}/>{label.toUpperCase()}</small><b>{categoryCounts[key] ?? 0} {t.years}</b></div>)}</div>
       <div className="method-note"><span>i</span><p>{t.method}</p></div>
-      <footer>EARTHSCOPE <span>·</span> NASA POWER</footer>
+      <footer>PRISMA <span>·</span> NASA POWER</footer>
     </aside>
   </main>;
 }
